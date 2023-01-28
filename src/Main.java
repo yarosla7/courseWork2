@@ -46,7 +46,12 @@ public class Main {
 //
 //        );
         Planner planner = new Planner("task", "s", "Каждый месяц.");
-        System.out.println(planner);
+        Planner planner1 = new Planner("task", "s", Planner.TypesOfRepetitions.EVERY_YEAR);
+        Planner planner2 = new Planner("task", "s", Planner.TypesOfRepetitions.ONE_TIME);
+        Planner planner3 = new Planner("task", "s", Planner.TypesOfRepetitions.EVERYDAY);
+        Planner planner4 = new Planner("task", "s", Planner.TypesOfRepetitions.EVERY_WEEK);
+        System.out.println(Planner.listOfTasks);
+
 
 //        System.out.println("PersonalTasks.listOfTasks = " + PersonalTasks.listOfTasks);
     }

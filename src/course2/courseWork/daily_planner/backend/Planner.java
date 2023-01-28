@@ -1,18 +1,19 @@
 package course2.courseWork.daily_planner.backend;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Planner implements Frequency {
     private static int id; //уникальный номер каждого таска
     private final String heading;
     private final String description;
     private final LocalDateTime dataTime;
+    public static List<Planner> list = new ArrayList<>();
     private final TypesOfRepetitions howOftenRemind;
-    private final Map<Integer, Planner> listOfTasks = new HashMap<>();
-    private boolean isWorkTask;
+    public static Map<Integer, Planner> listOfTasks = new HashMap<>(); //для создания мапы со всеми ключами и объектами
+    private LocalDate date = LocalDate.now();//по умолчанию дата будет текущая и от нее отсчет на повторения
+    private boolean isWorkTask; //проверка на тип задачи
 
     public Planner(String heading, String description, String howOftenRemind) {
         if (heading == null || heading.isEmpty() || heading.isBlank()) {
@@ -27,9 +28,10 @@ public class Planner implements Frequency {
         }
         this.howOftenRemind = TypesOfRepetitions.findByString(howOftenRemind); // здесь нет проверки так как у меня указан enum и невозможно ввести некорректное значение и у класса enum есть свои исключения.
         this.dataTime = LocalDateTime.now();
+        this.date = LocalDate.now();
         this.isWorkTask = false;
-        listOfTasks.put(getId(), this); // создание таблицы ключей и значений сразу на моменте создания объектов (задач)
         ++id;
+        listOfTasks.put(getId(), this); // создание таблицы ключей и значений сразу на моменте создания объектов (задач)
     }
 
     public Planner(String heading, String description, String howOftenRemind, boolean isWorkTask) {
@@ -45,9 +47,10 @@ public class Planner implements Frequency {
         }
         this.howOftenRemind = TypesOfRepetitions.findByString(howOftenRemind); // здесь нет проверки так как у меня указан enum и невозможно ввести некорректное значение и у класса enum есть свои исключения.
         this.dataTime = LocalDateTime.now();
+        this.date = LocalDate.now();
         this.isWorkTask = isWorkTask;
-        listOfTasks.put(getId(), this); // создание таблицы ключей и значений сразу на моменте создания объектов (задач)
         ++id;
+        listOfTasks.put(getId(), this); // создание таблицы ключей и значений сразу на моменте создания объектов (задач)
     } //конструктор, где прописывается тип задачи (параметры первого конструктора не перенесены, так как почему-то идея требовала сделать dataTime не final
 
     public Planner(String heading, String description, TypesOfRepetitions howOftenRemind) {
@@ -63,9 +66,31 @@ public class Planner implements Frequency {
         }
         this.howOftenRemind = howOftenRemind;
         this.dataTime = LocalDateTime.now();
+        switch (howOftenRemind) {
+            case EVERYDAY:
+                this.date = LocalDate.now();
+                break;
+            case ONE_TIME:
+                this.date = dataTime.toLocalDate();
+            case EVERY_WEEK:
+                if (this.date.isEqual(date)) {
+                    this.date.plusWeeks(1);
+                }
+                break;
+            case EVERY_MONTH:
+                if (this.date.isEqual(date)) {
+                    this.date.plusMonths(1);
+                }
+                break;
+            case EVERY_YEAR:
+                if (this.date.isEqual(date)) {
+                    this.date.plusYears(1);
+                }
+                break;
+        }
         this.isWorkTask = false;
-        listOfTasks.put(getId(), this); // создание таблицы ключей и значений сразу на моменте создания объектов (задач)
         ++id;
+        listOfTasks.put(getId(), this); // создание таблицы ключей и значений сразу на моменте создания объектов (задач)
     } //конструктор без String в выборе периодичности
 
     //getters and setters: =============================================================================================
@@ -86,12 +111,20 @@ public class Planner implements Frequency {
         return dataTime;
     }
 
+    public static List<Planner> getList() {
+        return list;
+    }
+
     public String getTypes() {
         return howOftenRemind.typesOfRepetitions;
     }
 
     public Map<Integer, Planner> getListOfTasks() {
         return listOfTasks;
+    }
+
+    public LocalDate getDate() {
+        return date;
     }
 
     public boolean isWorkTask() {
@@ -102,12 +135,23 @@ public class Planner implements Frequency {
         isWorkTask = workTask;
     }
 
+
     @Override
     public void oneTime() {
 
     }
 
     // методы интерфейса: ==============================================================================================
+    @Override
+    public void oneTime(LocalDate date) {
+        List<String> taskForDate = new ArrayList<>();
+        for (Planner planner : getList()) {
+            if (planner.date.equals(date)) {
+                taskForDate.add(String.valueOf(planner));
+            }
+        }
+        System.out.println(taskForDate);
+    }
 
     @Override
     public void everyDay() {
