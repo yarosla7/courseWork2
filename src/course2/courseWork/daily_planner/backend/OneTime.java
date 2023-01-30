@@ -4,6 +4,7 @@ package course2.courseWork.daily_planner.backend;
 
 import course2.courseWork.daily_planner.backend.exception.IncorrectArgumentException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class OneTime extends Planner {
@@ -12,7 +13,12 @@ public class OneTime extends Planner {
     }
 
     @Override
-    public LocalDateTime getTaskNextTime(LocalDateTime dateTime) {
+    public LocalDate getTaskNextTime(LocalDate dateTime) {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "<Одноразовая задача>\n " + super.toString();
     }
 }

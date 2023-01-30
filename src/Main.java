@@ -3,8 +3,8 @@ import course2.courseWork.daily_planner.backend.exception.IncorrectArgumentExcep
 import course2.courseWork.daily_planner.backend.exception.TaskNotFoundException;
 import course2.courseWork.daily_planner.frontend.ServiceClassPlanner;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Scanner;
@@ -15,7 +15,7 @@ public class Main {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     private static final Pattern DATA_PATTERN = Pattern.compile("\\d{2}\\.\\d{2}\\.\\d{4}");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private static final ServiceClassPlanner taskService = new ServiceClassPlanner();
+    private static final ServiceClassPlanner TASK_SERVICE = new ServiceClassPlanner();
 
     public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
@@ -39,6 +39,15 @@ public class Main {
                         case 4:
                             printAllTasks(scanner);
                             break;
+                        case 5:
+                            printAllDeleted(scanner);
+                            break;
+                        case 6:
+                            renameHead(scanner, scanner, scanner);
+                            break;
+                        case 7:
+                            printGroupedByDate(scanner);
+                            break;
                         case 0:
                             break label;
                     }
@@ -47,6 +56,8 @@ public class Main {
                     System.out.println("Выберите пункт меню из списка!");
                 }
             }
+        } catch (IncorrectArgumentException | TaskNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -72,7 +83,7 @@ public class Main {
         int id = scanner.nextInt();
 
         try {
-            taskService.removeTask(id);
+            TASK_SERVICE.removeTask(id);
         } catch (TaskNotFoundException e) {
             System.out.println(e.getMessage());
         }
@@ -84,24 +95,48 @@ public class Main {
         if (scanner.hasNext(DATA_PATTERN)) {
             String dataTime = scanner.next(DATA_PATTERN);
             LocalDate inputDate = LocalDate.parse(dataTime, DATE_FORMATTER);
-            Collection<Planner> taskByDate = taskService.getAllTasksForDate(inputDate);
+            Collection<Planner> taskByDate = TASK_SERVICE.getAllTasksForDate(inputDate);
 
             for (Planner task : taskByDate) {
                 System.out.println(task);
             }
         } else {
             System.out.println("Всё норм? Введите дату в формате dd.MM.yyyy: ");
-            scanner.close();
         }
     }
 
     private static void printAllTasks(Scanner scanner) {
-        taskService.getAllTasks();
+        TASK_SERVICE.getAllTasks();
+    }
+
+    private static void printAllDeleted(Scanner scanner) {
+        System.out.println(TASK_SERVICE.getAllDeletedTasks());
+    }
+
+    private static void renameHead(Scanner scanner, Scanner scanner2, Scanner scanner3) throws IncorrectArgumentException, TaskNotFoundException {
+        System.out.println("Введите ID задачи: ");
+        int id = scanner.nextInt();
+
+        System.out.println("Введите название (оставьте поле пустым, чтобы ничего не менять): ");
+
+        String heading = scanner2.next();
+
+        System.out.println("Введите описание (оставьте поле пустым, чтобы ничего не менять): ");
+
+        String description = scanner3.next();
+
+        TASK_SERVICE.renameHeading(id, heading, description);
+    }
+
+    private static void printGroupedByDate(Scanner scanner) {
+        System.out.println("Список задач сгруппированных по датам: ");
+        TASK_SERVICE.groupTasks();
     }
 
     private static void printMenu() {
         System.out.println(
-                "1. Добавить задачу \n2. Удалить задачу \n3. Получить задачу на указанный день \n4. Получить все задачи \n0. Выход"
+                "1. Добавить задачу \n2. Удалить задачу \n3. Получить задачу на указанный день \n4. Получить все задачи \n5. Получить все удалённые задачи \n6.Переименовать название и/или описание задачи" +
+                        "\n7. Сгруппировать задачи по датам \n0. Выход"
         );
     }
 
@@ -113,7 +148,6 @@ public class Main {
 
         if (heading.isBlank()) {
             System.out.println("Необходимо ввести название задачи");
-            scanner.close();
         }
         return heading;
     }
@@ -124,7 +158,6 @@ public class Main {
 
         if (description.isBlank()) {
             System.out.println("Необходимо ввести описание задачи");
-            scanner.close();
         }
         return description;
     }
@@ -146,7 +179,6 @@ public class Main {
                 break;
             default: {
                 System.out.println("Нужно выбрать корректной тип задачи");
-                scanner.close();
             }
         }
         return typo;
@@ -161,7 +193,6 @@ public class Main {
             return LocalDateTime.parse(dataTime, DATE_TIME_FORMATTER);
         } else {
             System.out.println("Всё норм? Введите дату и время задачи в формате dd.MM.yyyy HH:mm : ");
-            scanner.close();
             return null;
         }
     }
@@ -173,7 +204,6 @@ public class Main {
             return scanner.nextInt();
         } else {
             System.out.println("Введите число повторяемости задачи.");
-            scanner.close();
         }
         return -1;
     }
@@ -207,10 +237,14 @@ public class Main {
         }
 
         if (task != null) {
-            taskService.addTask(task);
+            TASK_SERVICE.addTask(task);
             System.out.println("Задача добавлена.");
         } else {
             System.out.println("Введены некорректные данные.");
         }
     }
 }
+//23.12.2023 14:00
+//24.12.2023 14:00
+//26.02.2023 12:00
+//25.04.2023 15:00

@@ -1,6 +1,7 @@
 package course2.courseWork.daily_planner.frontend;
 
 import course2.courseWork.daily_planner.backend.Planner;
+import course2.courseWork.daily_planner.backend.exception.IncorrectArgumentException;
 import course2.courseWork.daily_planner.backend.exception.TaskNotFoundException;
 
 import java.time.LocalDate;
@@ -19,11 +20,27 @@ public class ServiceClassPlanner {
     }
 
     public void removeTask(Integer taskId) throws TaskNotFoundException {
-        if (this.tasksMap.containsKey(taskId)) {
-            this.tasksMap.remove(taskId);
+        if (tasksMap.containsKey(taskId) && !tasksMap.get(taskId).isDelete()) {
+            tasksMap.get(taskId).setDelete(true);
+            System.out.println("Задача успешно удалена и перенесена в архив.");
         } else {
+            System.out.println("Задача успешно удалена.");
+        }
+        if (!tasksMap.containsKey(taskId)) {
             throw new TaskNotFoundException(taskId);
         }
+    }
+
+    public Collection<Planner> getAllDeletedTasks() {
+        Collection<Planner> deletedTasks = new ArrayList<>();
+        Collection<Planner> tasksValues = tasksMap.values();
+
+        for (Planner task : tasksValues) {
+            if (task.isDelete()) {
+                deletedTasks.add(task);
+            }
+        }
+        return deletedTasks;
     }
 
     public Collection<Planner> getAllTasksForDate(LocalDate date) {
@@ -32,23 +49,57 @@ public class ServiceClassPlanner {
 
         for (Planner task : allTasks) {
             LocalDateTime currentDateTime = task.getTaskDataTime();
+
             if (currentDateTime.toLocalDate().equals(date)) {
                 tasksForDate.add(task);
             }
 
-            LocalDateTime tasksNextTime = currentDateTime;
+            LocalDate tasksNextTime = LocalDate.from(currentDateTime);
 
             do {
                 tasksNextTime = task.getTaskNextTime(tasksNextTime);
 
-                if (tasksNextTime.toLocalDate().equals(date)) {
+                if (tasksNextTime.equals(date)) {
                     tasksForDate.add(task);
                     break;
                 }
-            } while (tasksNextTime.toLocalDate().isBefore(date));
+            } while (tasksNextTime.isBefore(date));
         }
         return tasksForDate;
     }
+
+    public void renameHeading(Integer taskId, String heading, String description) throws IncorrectArgumentException, TaskNotFoundException {
+        if (tasksMap.containsKey(taskId)) {
+            if (!heading.isEmpty()) {
+                tasksMap.get(taskId).setHeading(heading);
+                if (!description.isEmpty()) {
+                    tasksMap.get(taskId).setDescription(description);
+                }
+                System.out.println("Задача успешно переименована!");
+            }
+        } else {
+            throw new TaskNotFoundException(taskId);
+        }
+    }
+
+    public void groupTasks() {
+        Map<LocalDateTime, Planner> group = new HashMap<>();
+
+        for (Map.Entry<Integer, Planner> task : tasksMap.entrySet()) {
+            group.put(task.getValue().getTaskDataTime(), task.getValue());
+        }
+
+        for (Map.Entry<LocalDateTime, Planner> collect : group.entrySet()) {
+            System.out.println("Задачи на дату " + collect.getKey().toLocalDate() + ": ");
+            for (Planner task : tasksMap.values()) {
+                if (collect.getKey().isEqual(task.getTaskDataTime())) {
+                    System.out.println("\n" + task);
+                }
+            }
+        }
+
+    }
+
 
     public void getAllTasks() {
         System.out.println(tasksMap.values());

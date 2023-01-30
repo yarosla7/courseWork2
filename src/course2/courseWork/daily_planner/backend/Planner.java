@@ -8,11 +8,12 @@ import java.util.Objects;
 public abstract class Planner implements Frequency {
 
     private static int idGenerator;
-    private int id; //уникальный номер каждого таска
+    private final int id; //уникальный номер каждого таска
     private String heading;
     private String description;
     private TaskType taskType;
     private LocalDateTime taskDataTime;
+    private boolean isDelete;
 
     public Planner(String heading, String description, TaskType taskType, LocalDateTime taskDataTime) throws IncorrectArgumentException {
         setHeading(heading);
@@ -20,6 +21,7 @@ public abstract class Planner implements Frequency {
         setTaskType(taskType);
         setTaskDataTime(taskDataTime);
         this.id = idGenerator++;
+        this.isDelete = false;
     }
 
 //getters and setters: =============================================================================================
@@ -76,6 +78,13 @@ public abstract class Planner implements Frequency {
         }
     }
 
+    public boolean isDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(boolean delete) {
+        isDelete = delete;
+    }
     //hashcode, equals & toString: =====================================================================================
 
 
@@ -98,6 +107,6 @@ public abstract class Planner implements Frequency {
                 "ID - " + id + "\nНазвание: " + heading + '\'' +
                 "\nОписание: " + description + '\'' +
                 "\nТип задачи: " + taskType +
-                "\nДата и время исполнения задачи: " + taskDataTime + "\n";
+                "\nДата и время исполнения задачи: " + taskDataTime + (isDelete ? "\n <Задача удалена>" : " <Активная задача>") + "\n";
     }
 }
