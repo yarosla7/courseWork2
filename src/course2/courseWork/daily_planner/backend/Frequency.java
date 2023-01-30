@@ -1,21 +1,11 @@
 package course2.courseWork.daily_planner.backend;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface Frequency {
-    void oneTime();
 
     // методы интерфейса: ==============================================================================================
-    void oneTime(LocalDate date);
 
-    void everyDay();
+    LocalDateTime getTaskNextTime(LocalDateTime dateTime);
 
-    void everyWeek();
-
-    void everyMonth();
-
-    void everyYear();
-
-    class ServiceClassOfPlanner {
-    }
 }
